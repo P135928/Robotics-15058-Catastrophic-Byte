@@ -32,7 +32,7 @@ public class encoders {
     }
     private double ticksToDistance(double ticks) {
         final int ppr = 2000;
-        final int radius = 16;
+        final double radius = 0.6299213; // This is in inches so it's easier to read from the driver hub 16MM
         double circumference = 2 * Math.PI * radius;
         double revolutions = ticks / ppr;
         return circumference * revolutions;

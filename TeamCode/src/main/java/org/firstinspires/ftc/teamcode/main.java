@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class main extends LinearOpMode {
     @Override
@@ -11,35 +10,34 @@ public class main extends LinearOpMode {
         encoders encoders = new encoders(hardwareMap);
         encoders.resetEncoders();
         // Motors
-        DcMotor motor0 = hardwareMap.get(DcMotor.class, "motor0");
-        DcMotor motor1 = hardwareMap.get(DcMotor.class, "motor1");
-        DcMotor motor2 = hardwareMap.get(DcMotor.class, "motor2");
-        DcMotor motor3 = hardwareMap.get(DcMotor.class, "motor3");
-        // Servo(s)
-        Servo servo0 = hardwareMap.get(Servo.class, "servo0");
+        DcMotor motortl = hardwareMap.get(DcMotor.class, "motortl");
+        DcMotor motortr = hardwareMap.get(DcMotor.class, "motor1");
+        DcMotor motorbl = hardwareMap.get(DcMotor.class, "motor2");
+        DcMotor motorbr = hardwareMap.get(DcMotor.class, "motor3");
+        // Reverse right side motors so they spin forward correctly
+        motortr.setDirection(DcMotor.Direction.REVERSE);
+        motorbr.setDirection(DcMotor.Direction.REVERSE);
+        // Add brake power so it never jitters when swapping opModes
+        motortl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motortr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorbl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorbr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // This waits for start
         waitForStart();
         while (opModeIsActive()){
-            // Variables for everything! Turning, and the encoders positions.
+            double x = gamepad1.left_stick_x;
+            double y = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            double y_move = gamepad1.left_stick_y;
-            double y1dist = encoders.y1distance();
-            double y2dist = encoders.y2distance();
-            double x1dist = encoders.x1distance();
-            // If the turn and y_move are both at full power (1+1) it will move the servo
-            if (turn + y_move == 2) {
-                servo0.setPosition(1);
-            } else {
-                servo0.setPosition(0);
-            }
-            // This sets the motors power based on the turn and y movement
-            motor0.setPower(y_move + turn);
-            motor1.setPower(y_move + turn);
-            motor3.setPower(y_move - turn);
-            motor2.setPower(y_move - turn);
-            telemetry.addData("Y1 Distance", y1dist);
-            telemetry.addData("Y2 Distance", y2dist);
-            telemetry.addData("X1 Distance", x1dist);
+
+            motortl.setPower(y + x + turn);
+            motorbl.setPower(y - x + turn);
+            motortr.setPower(y - x - turn);
+            motorbr.setPower(y + x - turn);
+
+            // Telemetry for debugging
+            telemetry.addData("Y1 Distance", encoders.y1distance());
+            telemetry.addData("Y2 Distance", encoders.y2distance());
+            telemetry.addData("X1 Distance", encoders.x1distance());
             telemetry.update();
         }
     }

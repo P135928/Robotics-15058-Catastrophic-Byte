@@ -1,1 +1,4 @@
-This is the FTC SDK, but i've put my teams code (Catastrophic Byte 15056) on here. They will make a branch for their code and I will merge it if it doesn't have any code breaking bugs (I might have to merge it to find out lol). 
+# Road Runner Quickstart
+
+Check out the [docs](https://rr.brott.dev/docs/v1-0/tuning/).
+

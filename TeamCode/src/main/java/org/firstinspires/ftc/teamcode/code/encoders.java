@@ -1,15 +1,16 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.code;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class encoders {
     DcMotor ency1, ency2, encx1;
     public encoders(HardwareMap hwMap) {
-        ency2 = hwMap.get(DcMotor.class, "motor1");
-        encx1 = hwMap.get(DcMotor.class, "motor2");
-        ency1 = hwMap.get(DcMotor.class, "motor3");
+        ency1 = hwMap.get(DcMotor.class, "motortl");
+        ency2 = hwMap.get(DcMotor.class, "motortr");
+        encx1 = hwMap.get(DcMotor.class, "motorbl");
     }
     public double y1distance() {
+
         double ypos1 = ency1.getCurrentPosition();
         return ticksToDistance(ypos1);
     }
@@ -32,8 +33,8 @@ public class encoders {
     }
     private double ticksToDistance(double ticks) {
         final int ppr = 2000;
-        final double radius = 0.6299213; // This is in inches so it's easier to read from the driver hub 16MM
-        double circumference = 2 * Math.PI * radius;
+        final int diameter = 32; //mm
+        double circumference = Math.PI * diameter;
         double revolutions = ticks / ppr;
         return circumference * revolutions;
     }

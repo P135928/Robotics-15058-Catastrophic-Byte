@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.code;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 public class encoders {
     DcMotor ency1, ency2, encx1;
     public encoders(HardwareMap hwMap) {
@@ -33,7 +32,7 @@ public class encoders {
     }
     private double ticksToDistance(double ticks) {
         final int ppr = 2000;
-        final int diameter = 32; //mm
+        final double diameter = 1.259843; // in but is 32mm
         double circumference = Math.PI * diameter;
         double revolutions = ticks / ppr;
         return circumference * revolutions;

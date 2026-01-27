@@ -3,32 +3,36 @@ package org.firstinspires.ftc.teamcode.code;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
 @Autonomous
-
 public class auto extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Motors
-        DcMotor motor0 = hardwareMap.get(DcMotor.class, "leftFront");
-        DcMotor motor1 = hardwareMap.get(DcMotor.class, "rightFront");
-        DcMotor motor2 = hardwareMap.get(DcMotor.class, "leftBack");
-        DcMotor motor3 = hardwareMap.get(DcMotor.class, "rightBack");
-        motor0.setDirection(DcMotor.Direction.REVERSE);
-        motor2.setDirection(DcMotor.Direction.REVERSE);
+        DcMotor motortl = hardwareMap.get(DcMotor.class, "leftFront"); // slot 0
+        DcMotor motortr = hardwareMap.get(DcMotor.class, "rightFront"); // slot 1
+        DcMotor motorbl = hardwareMap.get(DcMotor.class, "leftBack"); // slot 2
+        DcMotor motorbr = hardwareMap.get(DcMotor.class, "rightBack"); //slot 3
+        // Setting the brake power to 0 so it doesn't jitter
+        motortl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motortr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorbl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorbr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Reversing the motors for proper driving
+        motortl.setDirection(DcMotor.Direction.REVERSE);
+        motorbl.setDirection(DcMotor.Direction.REVERSE);
         // This waits for start
         waitForStart();
+        //noinspection LoopStatementThatDoesntLoop
         while (opModeIsActive()){
-            motor0.setPower(.3);
-            motor1.setPower(.3);
-            motor2.setPower(.3);
-            motor3.setPower(.3);
+            motortl.setPower(.3);
+            motortr.setPower(.3);
+            motorbl.setPower(.3);
+            motorbr.setPower(.3);
             sleep(3000);
-            motor0.setPower(0);
-            motor1.setPower(0);
-            motor2.setPower(0);
-            motor3.setPower(0);
+            motortl.setPower(0);
+            motortr.setPower(0);
+            motorbl.setPower(0);
+            motorbr.setPower(0);
             break;
         }
     }//i have lost the ability to control the clanker

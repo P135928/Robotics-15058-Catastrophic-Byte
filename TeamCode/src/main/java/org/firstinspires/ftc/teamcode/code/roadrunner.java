@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-@TeleOp(name="USE ME!!! ME NO ONE ELSE!!!", group="TeleOp")
+@TeleOp(name="Main TeleOp", group="TeleOp")
 public class roadrunner extends LinearOpMode {
     @Override
     public void runOpMode() {

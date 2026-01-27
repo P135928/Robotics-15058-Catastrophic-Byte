@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 @Autonomous
-public class auto extends LinearOpMode {
+public class oldAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Motors

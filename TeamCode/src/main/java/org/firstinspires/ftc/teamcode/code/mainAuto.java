@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Autonomous
-public class roadrunnerAuto extends LinearOpMode {
+public class mainAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initial pose

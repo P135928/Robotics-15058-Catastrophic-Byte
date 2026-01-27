@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-@TeleOp(name="Main TeleOp", group="TeleOp")
-public class roadrunner extends LinearOpMode {
+@TeleOp(name="Main TeleOp", group="A-TeleOp")
+public class mainTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));

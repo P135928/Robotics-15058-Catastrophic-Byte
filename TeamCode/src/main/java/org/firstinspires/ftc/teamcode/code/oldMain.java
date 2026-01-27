@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name="driveTrain_Tester")
-public class main extends LinearOpMode {
+public class oldMain extends LinearOpMode {
     @Override
     public void runOpMode() {
         encoders encoders = new encoders(hardwareMap);

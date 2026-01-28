@@ -58,7 +58,7 @@ public final class MecanumDrive {
         // TODO: fill in these values based on
         //   see https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html?highlight=imu#physical-hub-mounting
         public RevHubOrientationOnRobot.LogoFacingDirection logoFacingDirection =
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+                RevHubOrientationOnRobot.LogoFacingDirection.UP;
         public RevHubOrientationOnRobot.UsbFacingDirection usbFacingDirection =
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
@@ -89,14 +89,6 @@ public final class MecanumDrive {
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;
         public double headingVelGain = 0.0; // shared with turn
-
-        public double par0InPerTick = 0.0007247738; // Left Pod
-        public double par1InPerTick = 0.0007247738; // Right Pod
-        public double perpInPerTick = 0.0007247738; // Back Pod
-        // TODO: Measure these values with a ruler! (in inches)
-        public double par0Y = 5.0;  
-        public double par1Y = -5.0; 
-        public double perpX = -4.0;
     }
 
     public static Params PARAMS = new Params();
@@ -128,92 +120,28 @@ public final class MecanumDrive {
     private final DownsampledWriter driveCommandWriter = new DownsampledWriter("DRIVE_COMMAND", 50_000_000);
     private final DownsampledWriter mecanumCommandWriter = new DownsampledWriter("MECANUM_COMMAND", 50_000_000);
 
-// PASTE THIS WHERE DriveLocalizer USED TO BE
-    public class ThreeDeadWheelLocalizer implements Localizer {
-        public final Encoder par0, par1, perp;
+    public class DriveLocalizer implements Localizer {
+        public final Encoder leftFront, leftBack, rightBack, rightFront;
+        public final IMU imu;
 
-        public final double par0InPerTick, par1InPerTick, perpInPerTick;
-
-        private int lastPar0Pos, lastPar1Pos, lastPerpPos;
+        private int lastLeftFrontPos, lastLeftBackPos, lastRightBackPos, lastRightFrontPos;
+        private Rotation2d lastHeading;
         private boolean initialized;
         private Pose2d pose;
 
-        public ThreeDeadWheelLocalizer(HardwareMap hardwareMap, double par0InPerTick, double par1InPerTick, double perpInPerTick) {
-            // TODO: name these exactly what they are in your Control Hub Config
-            par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "left_odo")));
-            par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "right_odo")));
-            perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "back_odo")));
+        public DriveLocalizer(Pose2d pose) {
+            leftFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.leftFront));
+            leftBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.leftBack));
+            rightBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightBack));
+            rightFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightFront));
 
-            // TODO: reverse any encoders if they count down when moving forward/left
-            // par0.setDirection(DcMotorSimple.Direction.REVERSE);
+            imu = lazyImu.get();
 
-            this.par0InPerTick = par0InPerTick;
-            this.par1InPerTick = par1InPerTick;
-            this.perpInPerTick = perpInPerTick;
+            // TODO: reverse encoders if needed
+            //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
-            this.pose = new Pose2d(0, 0, 0);
-        }
-
-        @Override
-        public void setPose(Pose2d pose) {
             this.pose = pose;
         }
-
-        @Override
-        public Pose2d getPose() {
-            return pose;
-        }
-
-        @Override
-        public PoseVelocity2d update() {
-            PositionVelocityPair par0PosVel = par0.getPositionAndVelocity();
-            PositionVelocityPair par1PosVel = par1.getPositionAndVelocity();
-            PositionVelocityPair perpPosVel = perp.getPositionAndVelocity();
-
-            if (!initialized) {
-                initialized = true;
-
-                lastPar0Pos = par0PosVel.position;
-                lastPar1Pos = par1PosVel.position;
-                lastPerpPos = perpPosVel.position;
-
-                return new PoseVelocity2d(new Vector2d(0.0, 0.0), 0.0);
-            }
-
-            int par0PosDelta = par0PosVel.position - lastPar0Pos;
-            int par1PosDelta = par1PosVel.position - lastPar1Pos;
-            int perpPosDelta = perpPosVel.position - lastPerpPos;
-
-            Twist2dDual<Time> twist = new Twist2dDual<>(
-                    new Vector2dDual<>(
-                            new DualNum<Time>(new double[] {
-                                    (par0PosDelta - par1PosDelta) * par0InPerTick / (PARAMS.par0Y - PARAMS.par1Y),
-                                    (par0PosVel.velocity - par1PosVel.velocity) * par0InPerTick / (PARAMS.par0Y - PARAMS.par1Y),
-                            }).times(PARAMS.perpX).plus(
-                                    new DualNum<Time>(new double[] {
-                                            perpPosDelta * perpInPerTick,
-                                            perpPosVel.velocity * perpInPerTick,
-                                    })
-                            ),
-                            new DualNum<Time>(new double[] {
-                                    (par1PosDelta * par0InPerTick * PARAMS.par0Y - par0PosDelta * par0InPerTick * PARAMS.par1Y) / (PARAMS.par0Y - PARAMS.par1Y),
-                                    (par1PosVel.velocity * par0InPerTick * PARAMS.par0Y - par0PosVel.velocity * par0InPerTick * PARAMS.par1Y) / (PARAMS.par0Y - PARAMS.par1Y),
-                            })
-                    ),
-                    new DualNum<Time>(new double[] {
-                            (par0PosDelta - par1PosDelta) * par0InPerTick / (PARAMS.par0Y - PARAMS.par1Y),
-                            (par0PosVel.velocity - par1PosVel.velocity) * par0InPerTick / (PARAMS.par0Y - PARAMS.par1Y),
-                    })
-            );
-
-            lastPar0Pos = par0PosVel.position;
-            lastPar1Pos = par1PosVel.position;
-            lastPerpPos = perpPosVel.position;
-
-            pose = pose.plus(twist.value());
-            return twist.velocity().value();
-        }
-    }
 
         @Override
         public void setPose(Pose2d pose) {
@@ -308,8 +236,7 @@ public final class MecanumDrive {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // TODO: reverse motor directions if needed
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
@@ -318,8 +245,7 @@ public final class MecanumDrive {
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        localizer = new ThreeDeadWheelLocalizer(hardwareMap, PARAMS.par0InPerTick, PARAMS.par1InPerTick, PARAMS.perpInPerTick);
-        localizer.setPose(pose);
+        localizer = new DriveLocalizer(pose);
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
@@ -525,14 +451,14 @@ public final class MecanumDrive {
     public PoseVelocity2d updatePoseEstimate() {
         PoseVelocity2d vel = localizer.update();
         poseHistory.add(localizer.getPose());
-        
+
         while (poseHistory.size() > 100) {
             poseHistory.removeFirst();
         }
 
         estimatedPoseWriter.write(new PoseMessage(localizer.getPose()));
-        
-        
+
+
         return vel;
     }
 
